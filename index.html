@@ -14,38 +14,39 @@
         html, body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); min-height: 100vh; }
         body { padding: 20px; padding-bottom: 50px; }
 
-        /* СТИЛЬНЫЙ ЛОАДЕР */
+        /* ЛОАДЕР С НЕОНОВЫМ КОНТУРОМ */
         #loader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--bg); z-index: 2000; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
         }
-        .loader-text { 
-            font-size: 10px; font-weight: 700; color: var(--muted); 
-            text-transform: uppercase; letter-spacing: 0.3em; 
-            margin-bottom: 30px; animation: breath 2.5s infinite ease-in-out; 
+        .logo-container { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+        
+        .logo-outline {
+            position: absolute; width: 100%; height: 100%;
+            border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.1);
+            border-top: 2px solid var(--accent);
+            box-shadow: 0 -5px 15px rgba(16, 185, 129, 0.3);
+            animation: spin 1.5s linear infinite;
         }
-        .logo-container { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
         .logo-icon {
-            width: 50px; height: 65px;
-            background: linear-gradient(135deg, #10b981, #34d399, #10b981);
-            background-size: 200% 200%;
-            border-radius: 8px 15px 15px 8px;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
-            animation: flow 4s infinite ease-in-out, pulse-scale 3s infinite ease-in-out;
+            width: 45px; height: 60px; background: linear-gradient(135deg, #10b981, #34d399);
+            border-radius: 5px 12px 12px 5px; position: relative; z-index: 2;
+            animation: pulse-inner 2s infinite ease-in-out;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
         }
         .logo-icon::before {
-            content: ""; position: absolute; top: 15px; left: 10px;
+            content: ""; position: absolute; top: 12px; left: 8px;
             width: 25px; height: 3px; background: rgba(255,255,255,0.4);
             border-radius: 2px; box-shadow: 0 8px 0 rgba(255,255,255,0.4), 0 16px 0 rgba(255,255,255,0.4);
         }
-        .copyright { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.15); margin-top: 10px; letter-spacing: 1px; }
+        .loader-text { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 35px; animation: glow-text 2s infinite ease-in-out; }
+        .copyright { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.15); margin-top: 15px; letter-spacing: 1px; }
 
-        @keyframes flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes pulse-scale { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.2); } }
-        @keyframes breath { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse-inner { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        @keyframes glow-text { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
         /* ИНТЕРФЕЙС */
         #main-content { opacity: 0; transition: 0.5s; }
@@ -82,13 +83,15 @@
 
     <div id="loader">
         <div class="loader-text">Загрузка данных...</div>
-        <div class="logo-container"><div class="logo-icon"></div></div>
+        <div class="logo-container">
+            <div class="logo-outline"></div>
+            <div class="logo-icon"></div>
+        </div>
         <div class="copyright">by @skwared</div>
     </div>
 
     <div id="main-content">
-        <div class="header-title">Единый Журнал</div>
-        <div class="header-sub">Группа 86РТК</div>
+        <div class="header-title">Журнал 86РТК</div>
         <input type="text" id="search" placeholder="Поиск по фамилии..." autocomplete="off">
         <div id="list"></div>
     </div>
@@ -130,7 +133,7 @@
 
         async function init(force = false) {
             if (tg) { tg.ready(); tg.expand(); tg.headerColor = '#1c2120'; }
-            const cached = localStorage.getItem('journal_final_v1');
+            const cached = localStorage.getItem('journal_unified_v4');
             if (!force && cached) { ALL_DATA = JSON.parse(cached); render(); hideLoader(); }
 
             try {
@@ -143,7 +146,7 @@
                 if (Array.isArray(resA)) resA.forEach(a => { if(a.name) absMap[a.name.trim()] = a.count; });
 
                 ALL_DATA = { journal: Array.isArray(resJ) ? resJ : (resJ.journal || []), absences: absMap };
-                localStorage.setItem('journal_final_v1', JSON.stringify(ALL_DATA));
+                localStorage.setItem('journal_unified_v4', JSON.stringify(ALL_DATA));
                 render(); hideLoader();
             } catch (e) {
                 if (!ALL_DATA.journal.length) document.querySelector('.loader-text').innerText = "Ошибка сети";
@@ -155,7 +158,6 @@
             container.innerHTML = '';
             const query = document.getElementById('search').value.toLowerCase();
 
-            // Топ-3
             const sortedByScore = [...ALL_DATA.journal].sort((a,b) => parseFloat(b.totalAverage.replace(',','.')) - parseFloat(a.totalAverage.replace(',','.')));
             const topNames = sortedByScore.slice(0, 3).map(s => s.studentName);
             const crowns = ['🥇', '🥈', '🥉'];
