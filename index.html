@@ -7,87 +7,98 @@
     <script src="https://telegram.org"></script>
     <style>
         :root {
-            --bg: #2d3735; --card: #3a4744; --accent: #10b981; --text: #e2e8f0; --muted: #94a3b8;
-            --error: #ff3b30;
+            --bg: #1c2120; --card: #2a3130; --accent: #10b981; --text: #e2e8f0; --muted: #94a3b8;
+            --error: #ff3b30; --tab-bg: #252c2b;
         }
         * { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
-        html, body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); overflow-y: auto; min-height: 100vh; }
-        body { padding: 20px; padding-bottom: 50px; }
+        html, body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); min-height: 100vh; }
+        body { padding: 20px; padding-bottom: 90px; }
 
         /* Лоадер */
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
         .loader-text { font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 25px; animation: breath 2s infinite; }
-        .progress-w { width: 150px; height: 2px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
-        .progress-l { width: 70px; height: 100%; background: #fff; position: absolute; left: -70px; animation: move 2s infinite; box-shadow: 0 0 10px #fff; }
-        #loader.error-state .progress-l { animation: blink-red 3s infinite !important; width: 100% !important; left: 0 !important; background: var(--error) !important; box-shadow: 0 0 20px var(--error) !important; }
-
+        .progress-w { width: 150px; height: 2px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        .progress-l { width: 70px; height: 100%; background: #fff; position: absolute; left: -70px; animation: move 2s infinite; }
         @keyframes move { 0% { left: -70px; } 100% { left: 150px; } }
         @keyframes breath { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-        @keyframes blink-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
 
         /* Интерфейс */
         #main-content { opacity: 0; transition: 0.5s; }
         .header-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; }
-        #search { width: 100%; border: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; border-radius: 15px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 15px; transition: 0.3s; }
-        #search:focus { border-color: rgba(255,255,255,0.3); }
+        #search { width: 100%; border: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; border-radius: 15px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 20px; }
 
-        .card { background: var(--card); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; }
-        .card:active { transform: scale(0.96); background: rgba(255,255,255,0.1); }
+        .card { background: var(--card); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .card:active { transform: scale(0.97); }
         .student-header { display: flex; justify-content: space-between; align-items: center; }
         .student-name { font-size: 16px; font-weight: 600; }
         
-        .score-pill { font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 8px; min-width: 32px; text-align: center; }
+        .score-pill { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; min-width: 35px; text-align: center; }
         .m-low { background: #ff3b30; } .m-warn { background: #ff9f0a; } .m-high { background: #34c759; }
-        .m-gold { background: linear-gradient(135deg, #ffd700, #ff9500); color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+        .m-gold { background: linear-gradient(135deg, #ffd700, #ff9500); color: #000; }
         .m-none { background: rgba(255,255,255,0.1); color: var(--muted); }
 
+        /* Вкладки предметов */
         .subs-container { display: none; padding-top: 15px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
         .subs-container.open { display: block; }
-        .sub-item { margin-bottom: 12px; transition: 0.1s; }
-        .sub-item:active { opacity: 0.8; }
+        .sub-item { margin-bottom: 12px; }
         .sub-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        
-        .marks-box { display: none; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 14px; margin-top: 5px; flex-direction: column; gap: 10px; }
+        .marks-box { display: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; margin-top: 5px; flex-direction: column; gap: 8px; }
         .marks-box.open { display: flex; }
-        .marks-row { display: flex; flex-wrap: wrap; gap: 5px; }
-        .mark { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 11px; font-weight: 800; }
-        
-        .analytic-tip { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 6px; display: inline-block; }
+        .marks-row { display: flex; flex-wrap: wrap; gap: 4px; }
+        .mark { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 10px; font-weight: 800; }
+        .analytic-tip { font-size: 9px; color: var(--accent); font-weight: 700; text-transform: uppercase; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 6px; align-self: flex-start; }
 
-        .fab-update { position: fixed; bottom: 30px; right: 20px; width: 52px; height: 52px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 0.5px solid rgba(255, 255, 255, 0.4); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 999; transition: all 0.2s; }
-        .fab-update:active { transform: scale(0.88); background: rgba(255, 255, 255, 0.2); }
-        .fab-update svg { width: 24px; height: 24px; fill: #fff; }
+        /* Навигация */
+        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--tab-bg); display: flex; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.4; transition: 0.3s; color: #fff; gap: 5px; }
+        .tab.active { opacity: 1; color: var(--accent); }
+        .tab svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* Обновление */
+        .fab-update { position: fixed; bottom: 85px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; z-index: 999; }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="loader-text">Загрузка данных...</div>
+        <div class="loader-text">Синхронизация...</div>
         <div class="progress-w"><div class="progress-l"></div></div>
     </div>
 
     <div id="main-content">
-        <div class="header-title">Журнал группы 86РТК</div>
-        <input type="text" id="search" placeholder="Поиск по фамилии..." autocomplete="off">
+        <div class="header-title" id="page-title">Журнал 86РТК</div>
+        <input type="text" id="search" placeholder="Поиск фамилии..." autocomplete="off">
         <div id="list"></div>
     </div>
 
+    <!-- Кнопка обновления -->
     <div class="fab-update" onclick="forceUpdate()">
-        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z""")/>></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z""")/>></svg>
+    </div>
+
+    <!-- Навигация -->
+    <div class="tab-bar">
+        <div class="tab active" id="tab-j" onclick="switchTab('j')">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z""")/>></svg>
+            Журнал
+        </div>
+        <div class="tab" id="tab-a" onclick="switchTab('a')">
+            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z""")/>></svg>
+            Отгулы
+        </div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwt1vwTw5fVSNXW_aGEnn5Ly1aVwGzmkFv0YPxDZZt6Jf8UOBPcM0PxZHm_oazlJ-i-/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx6XbYG1xE-77wGSVHXiuZxdfa2ZdAe8FywesBqgVerGtalHNdEAoaiFvXi6XSAJHlt/exec';
         const tg = window.Telegram?.WebApp;
-        let ALL_DATA = [];
+        let ALL_DATA = { journal: [], absences: [] };
+        let CURRENT_TAB = 'j';
 
         function getStyle(m) {
             const v = parseFloat(String(m).replace(',', '.'));
             if (isNaN(v) || v <= 0) return 'm-none';
-            if (v >= 9.5) return 'm-gold'; 
-            if (v >= 7) return 'm-high';
-            if (v >= 4) return 'm-warn';
-            return 'm-low';
+            if (v >= 9.5) return 'm-gold'; if (v >= 7) return 'm-high';
+            if (v >= 4) return 'm-warn'; return 'm-low';
         }
 
         function calcNeed(currentAvg, marks) {
@@ -95,96 +106,110 @@
             if (isNaN(avg) || avg >= 10 || marks.length === 0) return null;
             let decimal = avg - Math.floor(avg);
             if (decimal >= 0.29 && decimal <= 0.51) {
-                let target = Math.ceil(avg + 0.001); 
+                let target = Math.ceil(avg + 0.001);
                 let count = marks.length;
-                let sum = marks.reduce((a, b) => a + (parseFloat(b) || 0), 0);
-                for (let i = 1; i <= 15; i++) {
-                    let newAvg = (sum + (i * 10)) / (count + i);
-                    if (newAvg >= target) return `До ${target}.0 нужно: ${i} отм. (10)`;
+                let sum = marks.reduce((a, b) => a + (parseFloat(b.replace(',','.')) || 0), 0);
+                for (let i = 1; i <= 10; i++) {
+                    if ((sum + i * 10) / (count + i) >= target) return `Нужно ${i} отм. (10) до ${target}.0`;
                 }
             }
             return null;
         }
 
         async function init(force = false) {
-            if (tg) { tg.ready(); tg.expand(); tg.headerColor = '#2d3735'; }
-            const cached = localStorage.getItem('journal_cache');
-            const lastUpdate = localStorage.getItem('last_update_time');
-            const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-            const isExpired = lastUpdate && (Date.now() - lastUpdate > ONE_WEEK);
-
-            if (!force && cached && !isExpired) {
+            if (tg) { tg.ready(); tg.expand(); tg.headerColor = '#1c2120'; }
+            const cached = localStorage.getItem('data_cache');
+            if (!force && cached) {
                 ALL_DATA = JSON.parse(cached);
-                render(ALL_DATA); hideLoader();
+                render(); hideLoader();
             }
-
             try {
                 const res = await fetch(API_URL);
                 const newData = await res.json();
+                if (newData.error) throw new Error();
                 ALL_DATA = newData;
-                localStorage.setItem('journal_cache', JSON.stringify(newData));
-                localStorage.setItem('last_update_time', Date.now().toString());
-                render(ALL_DATA); hideLoader();
+                localStorage.setItem('data_cache', JSON.stringify(newData));
+                render(); hideLoader();
             } catch (e) {
-                if (!ALL_DATA.length) document.getElementById('loader').classList.add('error-state');
-                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                if (!ALL_DATA.journal.length) document.getElementById('loader').classList.add('error-state');
+            }
+        }
+
+        function switchTab(t) {
+            CURRENT_TAB = t;
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + t).classList.add('active');
+            document.getElementById('page-title').innerText = t === 'j' ? 'Журнал 86РТК' : 'Отгулы 86РТК';
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('list');
+            container.innerHTML = '';
+            const query = document.getElementById('search').value.toLowerCase();
+
+            if (CURRENT_TAB === 'j') {
+                const filtered = ALL_DATA.journal.filter(s => s.studentName.toLowerCase().includes(query))
+                    .sort((a,b) => a.studentName.localeCompare(b.studentName));
+                
+                filtered.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.onclick = () => {
+                        card.querySelector('.subs-container').classList.toggle('open');
+                        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('soft');
+                    };
+                    
+                    let subsHtml = s.subjects.map(sub => {
+                        const tip = calcNeed(sub.avg, sub.marks);
+                        return `<div class="sub-item" onclick="event.stopPropagation(); this.querySelector('.marks-box').classList.toggle('open');">
+                            <div class="sub-row"><span>${sub.subject}</span><span class="score-pill ${getStyle(sub.avg)}">${sub.avg}</span></div>
+                            <div class="marks-box">
+                                ${tip ? `<div class="analytic-tip">${tip}</div>` : ''}
+                                <div class="marks-row">${sub.marks.map(m => `<div class="mark ${getStyle(m)}">${m}</div>`).join('')}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+
+                    card.innerHTML = `
+                        <div class="student-header">
+                            <span class="student-name">${s.studentName}</span>
+                            <span class="score-pill ${getStyle(s.totalAverage)}">${s.totalAverage}</span>
+                        </div>
+                        <div class="subs-container">${subsHtml}</div>`;
+                    container.appendChild(card);
+                });
+            } else {
+                const filtered = ALL_DATA.absences.filter(a => a.name.toLowerCase().includes(query));
+                filtered.forEach(a => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    const count = parseInt(a.count) || 0;
+                    card.innerHTML = `
+                        <div class="student-header">
+                            <span class="student-name">${a.name}</span>
+                            <span class="score-pill ${count > 5 ? 'm-low' : 'm-high'}">${a.count} отг.</span>
+                        </div>`;
+                    container.appendChild(card);
+                });
             }
         }
 
         function forceUpdate() {
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            const loader = document.getElementById('loader');
-            loader.style.display = 'flex'; loader.style.opacity = '1';
-            loader.classList.remove('error-state'); init(true);
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('loader').style.opacity = '1';
+            init(true);
         }
 
         function hideLoader() {
-            const loader = document.getElementById('loader');
-            loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; document.getElementById('main-content').style.opacity = '1'; }, 500);
+            const l = document.getElementById('loader');
+            l.style.opacity = '0';
+            setTimeout(() => { l.style.display = 'none'; document.getElementById('main-content').style.opacity = '1'; }, 500);
         }
 
-        function render(items) {
-            const container = document.getElementById('list');
-            container.innerHTML = '';
-            const sorted = [...items].sort((a, b) => a.studentName.localeCompare(b.studentName));
-            const topByScore = [...items].sort((a, b) => parseFloat(b.totalAverage.replace(',','.')) - parseFloat(a.totalAverage.replace(',','.'))).slice(0, 3).map(s => s.studentName);
-            const crowns = ['🥇', '🥈', '🥉'];
-
-            sorted.forEach(s => {
-                const validSubjects = s.subjects.filter(sub => {
-                    const avgV = parseFloat(sub.avg.replace(',', '.'));
-                    return (sub.marks.length > 0 || avgV > 0) && !sub.avg.includes('#');
-                });
-                const card = document.createElement('div');
-                card.className = 'card';
-                const tIdx = topByScore.indexOf(s.studentName);
-                card.onclick = () => {
-                    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                    card.querySelector('.subs-container').classList.toggle('open');
-                };
-                let subsHtml = validSubjects.map(sub => {
-                    const cleanMarks = sub.marks.filter(m => m !== sub.avg);
-                    const tip = calcNeed(sub.avg, sub.marks);
-                    return `<div class="sub-item" onclick="event.stopPropagation(); this.querySelector('.marks-box').classList.toggle('open'); if(tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('soft');">
-                        <div class="sub-row"><span>${sub.subject}</span><span class="score-pill ${getStyle(sub.avg)}">${sub.avg}</span></div>
-                        <div class="marks-box">
-                            ${tip ? `<div class="analytic-tip">${tip}</div>` : ''}
-                            <div class="marks-row">${cleanMarks.map(m => `<div class="mark ${getStyle(m)}">${m}</div>`).join('') || '—'}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-                card.innerHTML = `<div class="student-header">
-                    <div><span>${s.studentName}</span>${tIdx !== -1 ? ` <span>${crowns[tIdx]}</span>` : ''}</div>
-                    <span class="score-pill ${getStyle(s.totalAverage)}">${s.totalAverage}</span>
-                </div>
-                <div class="subs-container">${subsHtml || '<div style="font-size:11px; opacity:0.3; text-align:center;">Нет данных</div>'}</div>`;
-                container.appendChild(card);
-            });
-        }
-        document.getElementById('search').oninput = (e) => {
-            render(ALL_DATA.filter(x => x.studentName.toLowerCase().includes(e.target.value.toLowerCase())));
-        };
+        document.getElementById('search').oninput = render;
         init();
     </script>
 </body>
