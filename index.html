@@ -11,8 +11,8 @@
             --error: #ff3b30; --tab-bg: #252c2b;
         }
         * { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
-        html, body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); min-height: 100vh; }
-        body { padding: 20px; padding-bottom: 90px; }
+        html, body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); min-height: 100vh; overflow-x: hidden; }
+        body { padding: 20px; padding-bottom: 100px; }
 
         /* Лоадер */
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
@@ -25,10 +25,11 @@
         /* Интерфейс */
         #main-content { opacity: 0; transition: 0.5s; }
         .header-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; }
-        #search { width: 100%; border: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; border-radius: 15px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 20px; }
+        #search { width: 100%; border: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; border-radius: 15px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 20px; transition: 0.3s; }
+        #search:focus { border-color: var(--accent); }
 
         .card { background: var(--card); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
-        .card:active { transform: scale(0.97); }
+        .card:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
         .student-header { display: flex; justify-content: space-between; align-items: center; }
         .student-name { font-size: 16px; font-weight: 600; }
         
@@ -48,20 +49,21 @@
         .mark { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 10px; font-weight: 800; }
         .analytic-tip { font-size: 9px; color: var(--accent); font-weight: 700; text-transform: uppercase; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 6px; align-self: flex-start; }
 
-        /* Навигация */
-        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--tab-bg); display: flex; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.4; transition: 0.3s; color: #fff; gap: 5px; }
+        /* Навигация (Tab Bar) */
+        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--tab-bg); display: flex; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.4; transition: 0.3s; color: #fff; gap: 6px; }
         .tab.active { opacity: 1; color: var(--accent); }
-        .tab svg { width: 20px; height: 20px; fill: currentColor; }
+        .tab svg { width: 22px; height: 22px; fill: currentColor; }
 
-        /* Обновление */
-        .fab-update { position: fixed; bottom: 85px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; z-index: 999; }
+        /* Плавающая кнопка обновления */
+        .fab-update { position: fixed; bottom: 90px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; z-index: 999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .fab-update:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="loader-text">Синхронизация...</div>
+        <div class="loader-text">Загрузка данных...</div>
         <div class="progress-w"><div class="progress-l"></div></div>
     </div>
 
@@ -71,15 +73,13 @@
         <div id="list"></div>
     </div>
 
-    <!-- Кнопка обновления -->
     <div class="fab-update" onclick="forceUpdate()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z""")/>></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z""")/>></svg>
     </div>
 
-    <!-- Навигация -->
     <div class="tab-bar">
         <div class="tab active" id="tab-j" onclick="switchTab('j')">
-            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z""")/>></svg>
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z""")/>></svg>
             Журнал
         </div>
         <div class="tab" id="tab-a" onclick="switchTab('a')">
@@ -89,7 +89,10 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzQ9pqWWkL5okBpAyuFY1-i4LFxX_BuTvK6wrtS_V2-HxO_QrcsUvmMrtXuutgINqGB/exec';
+        // --- ВСТАВЬ ССЫЛКИ СЮДА ---
+        const API_JOURNAL = 'https://script.google.com/macros/s/AKfycbzrbDXKkZhKJohza3bbsUF1eoDb9WbLcdfdfheog9cpsPpVHrScR0qb2TVc9JTGtN0b/exec';
+        const API_ABSENCES = 'https://script.google.com/macros/s/AKfycbyux4wfN_lVoodDq-JHHjbYAGuJys_DsZ2mADyUGdw1MERG-iZK833dN0tSzI7lq_QeZg/exec';
+        
         const tg = window.Telegram?.WebApp;
         let ALL_DATA = { journal: [], absences: [] };
         let CURRENT_TAB = 'j';
@@ -97,8 +100,10 @@
         function getStyle(m) {
             const v = parseFloat(String(m).replace(',', '.'));
             if (isNaN(v) || v <= 0) return 'm-none';
-            if (v >= 9.5) return 'm-gold'; if (v >= 7) return 'm-high';
-            if (v >= 4) return 'm-warn'; return 'm-low';
+            if (v >= 9.5) return 'm-gold'; 
+            if (v >= 7) return 'm-high';
+            if (v >= 4) return 'm-warn';
+            return 'm-low';
         }
 
         function calcNeed(currentAvg, marks) {
@@ -108,9 +113,9 @@
             if (decimal >= 0.29 && decimal <= 0.51) {
                 let target = Math.ceil(avg + 0.001);
                 let count = marks.length;
-                let sum = marks.reduce((a, b) => a + (parseFloat(b.replace(',','.')) || 0), 0);
-                for (let i = 1; i <= 10; i++) {
-                    if ((sum + i * 10) / (count + i) >= target) return `Нужно ${i} отм. (10) до ${target}.0`;
+                let sum = marks.reduce((a, b) => a + (parseFloat(String(b).replace(',','.')) || 0), 0);
+                for (let i = 1; i <= 12; i++) {
+                    if ((sum + i * 10) / (count + i) >= target) return `До ${target}.0 нужно: ${i} отм. (10)`;
                 }
             }
             return null;
@@ -118,20 +123,32 @@
 
         async function init(force = false) {
             if (tg) { tg.ready(); tg.expand(); tg.headerColor = '#1c2120'; }
-            const cached = localStorage.getItem('data_cache');
+            
+            const cached = localStorage.getItem('app_cache_v2');
             if (!force && cached) {
                 ALL_DATA = JSON.parse(cached);
                 render(); hideLoader();
             }
+
             try {
-                const res = await fetch(API_URL);
-                const newData = await res.json();
-                if (newData.error) throw new Error();
-                ALL_DATA = newData;
-                localStorage.setItem('data_cache', JSON.stringify(newData));
+                // Загружаем данные из двух источников одновременно
+                const [resJ, resA] = await Promise.all([
+                    fetch(API_JOURNAL).then(r => r.json()),
+                    fetch(API_ABSENCES).then(r => r.json())
+                ]);
+
+                ALL_DATA = {
+                    journal: Array.isArray(resJ) ? resJ : (resJ.journal || []),
+                    absences: Array.isArray(resA) ? resA : []
+                };
+
+                localStorage.setItem('app_cache_v2', JSON.stringify(ALL_DATA));
                 render(); hideLoader();
             } catch (e) {
-                if (!ALL_DATA.journal.length) document.getElementById('loader').classList.add('error-state');
+                console.error("Ошибка сети", e);
+                if (!ALL_DATA.journal.length) {
+                    document.querySelector('.loader-text').innerText = "Ошибка загрузки";
+                }
             }
         }
 
@@ -150,10 +167,10 @@
             const query = document.getElementById('search').value.toLowerCase();
 
             if (CURRENT_TAB === 'j') {
-                const filtered = ALL_DATA.journal.filter(s => s.studentName.toLowerCase().includes(query))
+                const list = ALL_DATA.journal.filter(s => s.studentName.toLowerCase().includes(query))
                     .sort((a,b) => a.studentName.localeCompare(b.studentName));
                 
-                filtered.forEach(s => {
+                list.forEach(s => {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.onclick = () => {
@@ -177,12 +194,17 @@
                             <span class="student-name">${s.studentName}</span>
                             <span class="score-pill ${getStyle(s.totalAverage)}">${s.totalAverage}</span>
                         </div>
-                        <div class="subs-container">${subsHtml}</div>`;
+                        <div class="subs-container">${subsHtml || '<div style="font-size:11px; opacity:0.3; text-align:center;">Нет данных</div>'}</div>`;
                     container.appendChild(card);
                 });
             } else {
-                const filtered = ALL_DATA.absences.filter(a => a.name.toLowerCase().includes(query));
-                filtered.forEach(a => {
+                const list = ALL_DATA.absences.filter(a => a.name.toLowerCase().includes(query));
+                
+                if (list.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; opacity:0.3; margin-top:50px;">Список пуст</div>';
+                }
+
+                list.forEach(a => {
                     const card = document.createElement('div');
                     card.className = 'card';
                     const count = parseInt(a.count) || 0;
@@ -198,8 +220,8 @@
 
         function forceUpdate() {
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            document.getElementById('loader').style.display = 'flex';
-            document.getElementById('loader').style.opacity = '1';
+            const l = document.getElementById('loader');
+            l.style.display = 'flex'; l.style.opacity = '1';
             init(true);
         }
 
