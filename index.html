@@ -14,25 +14,50 @@
         html, body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); min-height: 100vh; }
         body { padding: 20px; padding-bottom: 50px; }
 
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
-        .loader-text { font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 25px; animation: breath 2s infinite; }
-        .progress-w { width: 150px; height: 2px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; }
-        .progress-l { width: 70px; height: 100%; background: #fff; position: absolute; left: -70px; animation: move 2s infinite; }
-        @keyframes move { 0% { left: -70px; } 100% { left: 150px; } }
-        @keyframes breath { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        /* СТИЛЬНЫЙ ЛОАДЕР */
+        #loader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); z-index: 2000; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .loader-text { 
+            font-size: 10px; font-weight: 700; color: var(--muted); 
+            text-transform: uppercase; letter-spacing: 0.3em; 
+            margin-bottom: 30px; animation: breath 2.5s infinite ease-in-out; 
+        }
+        .logo-container { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .logo-icon {
+            width: 50px; height: 65px;
+            background: linear-gradient(135deg, #10b981, #34d399, #10b981);
+            background-size: 200% 200%;
+            border-radius: 8px 15px 15px 8px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+            animation: flow 4s infinite ease-in-out, pulse-scale 3s infinite ease-in-out;
+        }
+        .logo-icon::before {
+            content: ""; position: absolute; top: 15px; left: 10px;
+            width: 25px; height: 3px; background: rgba(255,255,255,0.4);
+            border-radius: 2px; box-shadow: 0 8px 0 rgba(255,255,255,0.4), 0 16px 0 rgba(255,255,255,0.4);
+        }
+        .copyright { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.15); margin-top: 10px; letter-spacing: 1px; }
 
+        @keyframes flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes pulse-scale { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.2); } }
+        @keyframes breath { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+
+        /* ИНТЕРФЕЙС */
         #main-content { opacity: 0; transition: 0.5s; }
         .header-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
         .header-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        #search { width: 100%; border: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; border-radius: 15px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 20px; }
+        #search { width: 100%; border: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; border-radius: 15px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 20px; transition: 0.3s; }
         #search:focus { border-color: var(--accent); }
 
         .card { background: var(--card); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
         .card:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
-        
         .student-header { display: flex; justify-content: space-between; align-items: center; }
         .student-name { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        
         .abs-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: var(--muted); border: 1px solid rgba(255,255,255,0.05); }
 
         .score-pill { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; min-width: 38px; text-align: center; }
@@ -56,8 +81,9 @@
 <body>
 
     <div id="loader">
-        <div class="loader-text">Синхронизация...</div>
-        <div class="progress-w"><div class="progress-l"></div></div>
+        <div class="loader-text">Загрузка данных...</div>
+        <div class="logo-container"><div class="logo-icon"></div></div>
+        <div class="copyright">by @skwared</div>
     </div>
 
     <div id="main-content">
@@ -72,8 +98,9 @@
     </div>
 
     <script>
-        const API_JOURNAL = 'https://script.google.com/macros/s/AKfycbzrbDXKkZhKJohza3bbsUF1eoDb9WbLcdfdfheog9cpsPpVHrScR0qb2TVc9JTGtN0b/exec';
-        const API_ABSENCES = 'https://script.google.com/macros/s/AKfycbyux4wfN_lVoodDq-JHHjbYAGuJys_DsZ2mADyUGdw1MERG-iZK833dN0tSzI7lq_QeZg/exec';
+        // --- ВСТАВЬ ССЫЛКИ СЮДА ---
+        const API_JOURNAL = 'ССЫЛКА_НА_ОЦЕНКИ';
+        const API_ABSENCES = 'ССЫЛКА_НА_ОТГУЛЫ';
         
         const tg = window.Telegram?.WebApp;
         let ALL_DATA = { journal: [], absences: {} };
@@ -95,7 +122,7 @@
                 let target = Math.ceil(avg + 0.001);
                 let sum = marks.reduce((a, b) => a + (parseFloat(String(b).replace(',','.')) || 0), 0);
                 for (let i = 1; i <= 10; i++) {
-                    if ((sum + i * 10) / (marks.length + i) >= target) return `Нужно получить ${i} отм. (10) до ${target}.0`;
+                    if ((sum + i * 10) / (marks.length + i) >= target) return `Нужно ${i} отм. (10) до ${target}.0`;
                 }
             }
             return null;
@@ -103,12 +130,8 @@
 
         async function init(force = false) {
             if (tg) { tg.ready(); tg.expand(); tg.headerColor = '#1c2120'; }
-            
-            const cached = localStorage.getItem('unified_cache_v3');
-            if (!force && cached) {
-                ALL_DATA = JSON.parse(cached);
-                render(); hideLoader();
-            }
+            const cached = localStorage.getItem('journal_final_v1');
+            if (!force && cached) { ALL_DATA = JSON.parse(cached); render(); hideLoader(); }
 
             try {
                 const [resJ, resA] = await Promise.all([
@@ -117,19 +140,13 @@
                 ]);
 
                 const absMap = {};
-                if (Array.isArray(resA)) {
-                    resA.forEach(a => { if(a.name) absMap[a.name.trim()] = a.count; });
-                }
+                if (Array.isArray(resA)) resA.forEach(a => { if(a.name) absMap[a.name.trim()] = a.count; });
 
-                ALL_DATA = {
-                    journal: Array.isArray(resJ) ? resJ : (resJ.journal || []),
-                    absences: absMap
-                };
-
-                localStorage.setItem('unified_cache_v3', JSON.stringify(ALL_DATA));
+                ALL_DATA = { journal: Array.isArray(resJ) ? resJ : (resJ.journal || []), absences: absMap };
+                localStorage.setItem('journal_final_v1', JSON.stringify(ALL_DATA));
                 render(); hideLoader();
             } catch (e) {
-                if (!ALL_DATA.journal.length) document.querySelector('.loader-text').innerText = "Ошибка загрузки";
+                if (!ALL_DATA.journal.length) document.querySelector('.loader-text').innerText = "Ошибка сети";
             }
         }
 
@@ -138,16 +155,12 @@
             container.innerHTML = '';
             const query = document.getElementById('search').value.toLowerCase();
 
-            // Сортировка для ТОП-3
-            const sortedByScore = [...ALL_DATA.journal].sort((a,b) => 
-                parseFloat(b.totalAverage.replace(',','.')) - parseFloat(a.totalAverage.replace(',','.'))
-            );
+            // Топ-3
+            const sortedByScore = [...ALL_DATA.journal].sort((a,b) => parseFloat(b.totalAverage.replace(',','.')) - parseFloat(a.totalAverage.replace(',','.')));
             const topNames = sortedByScore.slice(0, 3).map(s => s.studentName);
             const crowns = ['🥇', '🥈', '🥉'];
 
-            const list = ALL_DATA.journal
-                .filter(s => s.studentName.toLowerCase().includes(query))
-                .sort((a,b) => a.studentName.localeCompare(b.studentName));
+            const list = ALL_DATA.journal.filter(s => s.studentName.toLowerCase().includes(query)).sort((a,b) => a.studentName.localeCompare(b.studentName));
             
             list.forEach(s => {
                 const card = document.createElement('div');
@@ -173,12 +186,10 @@
 
                 card.innerHTML = `
                     <div class="student-header">
-                        <div class="student-info">
-                            <span class="student-name">
-                                ${s.studentName} ${tIdx !== -1 ? crowns[tIdx] : ''}
-                                <span class="abs-badge">⏳ ${absCount}</span>
-                            </span>
-                        </div>
+                        <span class="student-name">
+                            ${s.studentName} ${tIdx !== -1 ? crowns[tIdx] : ''}
+                            <span class="abs-badge">⏳ ${absCount}</span>
+                        </span>
                         <span class="score-pill ${getStyle(s.totalAverage)}">${s.totalAverage}</span>
                     </div>
                     <div class="subs-container">${subsHtml || '<div style="font-size:11px; opacity:0.3; text-align:center;">Нет данных</div>'}</div>`;
@@ -187,16 +198,16 @@
         }
 
         function forceUpdate() {
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            document.getElementById('loader').style.display = 'flex';
-            document.getElementById('loader').style.opacity = '1';
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            const l = document.getElementById('loader');
+            l.style.display = 'flex'; l.style.opacity = '1';
             init(true);
         }
 
         function hideLoader() {
             const l = document.getElementById('loader');
             l.style.opacity = '0';
-            setTimeout(() => { l.style.display = 'none'; document.getElementById('main-content').style.opacity = '1'; }, 500);
+            setTimeout(() => { l.style.display = 'none'; document.getElementById('main-content').style.opacity = '1'; }, 600);
         }
 
         document.getElementById('search').oninput = render;
