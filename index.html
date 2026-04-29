@@ -552,8 +552,19 @@
         const API_JOURNAL = 'https://script.google.com/macros/s/AKfycbxTadEkFm_NWSpIxLKLed1EibzRKT_-XGY2ITonGU5IW0hBTKAZgaAQrGaGPB2ZYpJRtQ/exec';
         const API_ABSENCES = 'https://script.google.com/macros/s/AKfycbws_ntyEhgHLnrH74-bRxMb2Sb2LzhwuzFKXNrfERTmS979s9cn6-rFAbPHVQ-H-LbyqQ/exec';
         
-        // УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ЭТОЙ ГРУППЫ - важно! Не совпадает с ключом другой группы
-        const CACHE_KEY = 'journal_98tp_v1';
+        // УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ГРУППЫ 98ТП
+        const CACHE_KEY = 'journal_98tp_v2';
+        
+        // ===== ФИЛЬТРАЦИЯ - ТОЛЬКО УЧЕНИКИ 98ТП =====
+        // Список учеников 98ТП (все, кто должен отображаться)
+        const GROUP_98TP_STUDENTS = [
+            "Абитковская", "Бертов", "Будник", "Веремейчик", "Вильтовская", 
+            "Елисеенко", "Жуковский", "Захарченя", "Иванова", "Игнатович", 
+            "Кислая", "Котько", "Корчевская", "Коршун", "Куч", "Ложникова", 
+            "Подобед", "Полов", "Прачковский", "Расолько", "Рончик", "Рыжкина", 
+            "Славцевич", "Смолич", "Сырников", "Фандо", "Филимонов", "Шманай", 
+            "Шустов", "Юстинчук"
+        ];
         
         let ALL_DATA = { journal: [], absences: {} };
         let isLoading = false;
@@ -627,7 +638,6 @@
                 }
             }, 20000);
             
-            // ИСПОЛЬЗУЕМ УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ЭТОЙ ГРУППЫ
             const cached = localStorage.getItem(CACHE_KEY);
             if (!force && cached) {
                 try {
@@ -674,12 +684,18 @@
                     throw new Error('No data');
                 }
                 
+                // ===== ВАЖНО: ФИЛЬТРУЕМ ТОЛЬКО УЧЕНИКОВ 98ТП =====
+                const filteredJournalData = journalData.filter(student => 
+                    GROUP_98TP_STUDENTS.includes(student.studentName)
+                );
+                
+                console.log(`Фильтрация: было ${journalData.length} учеников, стало ${filteredJournalData.length} учеников 98ТП`);
+                
                 ALL_DATA = { 
-                    journal: journalData, 
+                    journal: filteredJournalData, 
                     absences: absMap 
                 };
                 
-                // СОХРАНЯЕМ С УНИКАЛЬНЫМ КЛЮЧОМ
                 localStorage.setItem(CACHE_KEY, JSON.stringify(ALL_DATA));
                 render();
                 hideLoader();
@@ -815,7 +831,6 @@
             if (tg && tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('medium');
             }
-            // Очищаем ТОЛЬКО кэш этой группы
             localStorage.removeItem(CACHE_KEY);
             init(true);
         }
@@ -852,7 +867,6 @@
             });
         }
         
-        // Принудительно игнорируем кэш при первом запуске для этой группы
         init(true);
         
         window.forceUpdate = forceUpdate;
