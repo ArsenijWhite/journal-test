@@ -552,7 +552,7 @@
         const API_JOURNAL = 'https://script.google.com/macros/s/AKfycbxTadEkFm_NWSpIxLKLed1EibzRKT_-XGY2ITonGU5IW0hBTKAZgaAQrGaGPB2ZYpJRtQ/exec';
         const API_ABSENCES = 'https://script.google.com/macros/s/AKfycbws_ntyEhgHLnrH74-bRxMb2Sb2LzhwuzFKXNrfERTmS979s9cn6-rFAbPHVQ-H-LbyqQ/exec';
         
-        // УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ГРУППЫ 98ТП
+        // УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ЭТОЙ ГРУППЫ - важно! Не совпадает с ключом другой группы
         const CACHE_KEY = 'journal_98tp_v1';
         
         let ALL_DATA = { journal: [], absences: {} };
@@ -627,7 +627,7 @@
                 }
             }, 20000);
             
-            // ИСПОЛЬЗУЕМ УНИКАЛЬНЫЙ КЛЮЧ
+            // ИСПОЛЬЗУЕМ УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ ЭТОЙ ГРУППЫ
             const cached = localStorage.getItem(CACHE_KEY);
             if (!force && cached) {
                 try {
@@ -815,7 +815,7 @@
             if (tg && tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('medium');
             }
-            // ОЧИЩАЕМ ТОЛЬКО КЛЮЧ ЭТОЙ ГРУППЫ
+            // Очищаем ТОЛЬКО кэш этой группы
             localStorage.removeItem(CACHE_KEY);
             init(true);
         }
@@ -852,7 +852,8 @@
             });
         }
         
-        init();
+        // Принудительно игнорируем кэш при первом запуске для этой группы
+        init(true);
         
         window.forceUpdate = forceUpdate;
     </script>
